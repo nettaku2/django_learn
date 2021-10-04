@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import fields
 from django.db.models.deletion import CASCADE, SET_NULL
 
 # Create your models here.
@@ -52,6 +53,12 @@ class Customer(models.Model):
         choices=MEMBERSHIP_CHOICES,
         default=MEMBERSHIP_BRONZE)
 
+    # class Meta:
+    #     db_table = 'store_customers'
+    #     indexs = [
+    #         models.Index(fields=['last_name', 'first_name'])
+    #     ]
+
 
 class Order(models.Model):
     PAYMENT_STATUS_PENDING = 'P'
@@ -63,7 +70,7 @@ class Order(models.Model):
         (PAYMENT_STATUS_FAILED, 'Failed')
     ]
     placed_at = models.DateTimeField(auto_now_add=True)
-    payment = models.CharField(
+    payment_status = models.CharField(
         max_length=1,
         choices=PAYMENT_STATUS_CHOICES,
         default=PAYMENT_STATUS_PENDING)
@@ -73,6 +80,7 @@ class Order(models.Model):
 class Address(models.Model):
     street = models.CharField(max_length=255)
     city = models.CharField(max_length=255)
+    zip = models.CharField(max_length=255, null=True)
     customer = models.ForeignKey(
         Customer,
         on_delete=models.CASCADE)

@@ -12,5 +12,10 @@
     {% else %}
     <h1>hello World</h1>
     {% endif %}
+    <ul>
+      {% for product in products %}
+      <li>{{ product.title }} ${{ product.collection_id }}</li>
+      {% endfor %}
+    </ul>
   </body>
 </html>
