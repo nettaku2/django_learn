@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from django.core.exceptions import ObjectDoesNotExist
 from store.models import Product
 from store.models import Collection
+from store.models import Order
 from store.models import OrderItem
 from django.db.models import F
 import json
@@ -19,8 +20,9 @@ def say_hello(request):
 
 
 def say_hello2(request):
-    query_set = Product.objects.select_related('collection').all()
-    return render(request, 'hello.html', {'products': list(query_set)})
+    query_set = Order.objects.select_related(
+        'customer').values('id', 'customer__first_name').order_by('id').reverse()[:5]
+    return render(request, 'hello.html', {'orders': list(query_set)})
 
 
 def love_sabrina(request):

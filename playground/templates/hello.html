@@ -13,8 +13,8 @@
     <h1>hello World</h1>
     {% endif %}
     <ul>
-      {% for product in products %}
-      <li>{{ product.title }} ${{ product.collection_id }}</li>
+      {% for order in orders %}
+      <li>{{ order.id }} {{ order.customer__first_name }}</li>
       {% endfor %}
     </ul>
   </body>

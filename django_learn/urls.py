@@ -18,6 +18,9 @@ from django.urls import path, include
 from playground.views import say_hello
 from playground import views
 
+admin.site.site_header = "django_learn Admin"
+admin.site.index_title = 'Admin'
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('say_hello/', say_hello),
