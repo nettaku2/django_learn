@@ -17,6 +17,7 @@ from django.contrib import admin
 from django.urls import path, include
 from playground.views import say_hello
 from playground import views
+import debug_toolbar
 
 admin.site.site_header = "django_learn Admin"
 admin.site.index_title = 'Admin'
@@ -25,4 +26,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('say_hello/', say_hello),
     path('playground/', include('playground.urls')),
+    path('__debug__/', include(debug_toolbar.urls)),
 ]
