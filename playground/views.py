@@ -5,7 +5,9 @@ from store.models import Product
 from store.models import Collection
 from store.models import Order
 from store.models import OrderItem
-from django.db.models import F, Q
+from store.models import Customer
+from django.db.models import F, Q, Value
+from django.db.models.aggregates import Count, Max, Min, Avg, Sum
 import json
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -20,39 +22,14 @@ def say_hello(request):
 
     return HttpResponse('hello world')
 
+
 def orm(request):
-    collections = Collection.objects.all().order_by('id')
-    for collection in list(collections):
-        print(collection.title)
-
-    print('==========================')
-    collection = Collection.objects.get(pk=2)
-    print(f'id: {collection.id}, title: {collection.title}')
-
-    products = Product.objects.filter(last_update__year=2020)
-
-    try:
-        product = Product.objects.get(id=0)
-    except ObjectDoesNotExist:
-        product = { 'title': 'sabrina' }
-    # product = Product.objects.filter(id=0).exists()
-    # print(product)
-
-    # products = Product.objects.filter(inventory__lt=10).filter(unit_price__lt=20)
-    # products = Product.objects.filter(inventory__lt=10, unit_price__lt=20)
-    # products = Product.objects.filter(~Q(inventory__lt=10) & Q(unit_price__lt=20))
-    # products = Product.objects.filter(inventory=F('collection__title'))
-    products = Product.objects.all().order_by('id')
-
+    result = Customer.objects.annotate(
+        full_name=F('first_name'))
     return render(request, 'orm.html',
-    {
-        'name': 'harry',
-        'age': 48,
-        'collections': list(collections),
-        'collection': collection,
-        'products': products,
-        'product': product
-    })
+                  {
+                      'result': list(result),
+                  })
 
 
 def say_hello2(request):
