@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from playground.views import say_hello
+from playground.views import say_hello, orm
 from playground import views
 import debug_toolbar
 
@@ -27,4 +27,5 @@ urlpatterns = [
     path('say_hello/', say_hello),
     path('playground/', include('playground.urls')),
     path('__debug__/', include(debug_toolbar.urls)),
+    path('', orm)
 ]
