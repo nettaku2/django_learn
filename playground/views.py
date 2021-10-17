@@ -1,3 +1,4 @@
+from django.db.models.fields import DecimalField
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.core.exceptions import ObjectDoesNotExist
@@ -6,9 +7,10 @@ from store.models import Collection
 from store.models import Order
 from store.models import OrderItem
 from store.models import Customer
-from django.db.models import F, Q, Value
+from django.db.models import F, Q, Value, Func
 from django.db.models.aggregates import Count, Max, Min, Avg, Sum
 import json
+from django.db.models.functions import Concat
 from django.core.exceptions import ObjectDoesNotExist
 
 
@@ -24,11 +26,10 @@ def say_hello(request):
 
 
 def orm(request):
-    result = Customer.objects.annotate(
-        full_name=F('first_name'))
+    queryset = Customer.objects.prefetch_related('a')
     return render(request, 'orm.html',
                   {
-                      'result': list(result),
+                      'result': list(queryset),
                   })
 
 
