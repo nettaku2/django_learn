@@ -26,10 +26,11 @@ def say_hello(request):
 
 
 def orm(request):
-    queryset = Customer.objects.prefetch_related('a')
+    collection = Product.objects.filter(description__isnull=True)
+    # print(collection[0].orderitem)
     return render(request, 'orm.html',
                   {
-                      'result': list(queryset),
+                      'result': list(collection),
                   })
 
 
