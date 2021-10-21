@@ -16,5 +16,5 @@ class TaggedItem(models.Model):
     # Type of object - find table
     # ID of object - find record
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    object_id = models.PositiveBigIntegerField()
+    object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey()

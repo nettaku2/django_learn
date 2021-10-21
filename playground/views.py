@@ -7,6 +7,7 @@ from store.models import Collection
 from store.models import Order
 from store.models import OrderItem
 from store.models import Customer
+from store.models import Address
 from django.db.models import F, Q, Value, Func
 from django.db.models.aggregates import Count, Max, Min, Avg, Sum
 import json
@@ -25,12 +26,13 @@ def say_hello(request):
     return HttpResponse('hello world')
 
 
-def orm(request):
-    collection = Product.objects.filter(description__isnull=True)
+def orm(request):    
+    # query_set = Product.objects.filter(collection__title='beauty')
+    query_set = Customer.objects.filter(order__orderitem__product__title__icontains='bread').all()
     # print(collection[0].orderitem)
     return render(request, 'orm.html',
                   {
-                      'result': list(collection),
+                      'result': list(query_set),
                   })
 
 
