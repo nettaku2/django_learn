@@ -8,7 +8,7 @@ from store.models import Order
 from store.models import OrderItem
 from store.models import Customer
 from store.models import Address
-from django.db.models import F, Q, Value, Func
+from django.db.models import F, Q, Value, Func, ExpressionWrapper
 from django.db.models.aggregates import Count, Max, Min, Avg, Sum
 import json
 from django.db.models.functions import Concat
@@ -26,13 +26,14 @@ def say_hello(request):
     return HttpResponse('hello world')
 
 
-def orm(request):    
-    # query_set = Product.objects.filter(collection__title='beauty')
-    query_set = Customer.objects.filter(order__orderitem__product__title__icontains='bread').all()
-    # print(collection[0].orderitem)
+def orm(request):
+    queryset = Product.objects.annotate(
+        total_sales=Sum(F('orderitem__quantity') *
+                        F('orderitem__unit_price'))
+    ).order_by('-total_sales')[:5]
     return render(request, 'orm.html',
                   {
-                      'result': list(query_set),
+                      'result': list(queryset),
                   })
 
 

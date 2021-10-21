@@ -1,0 +1,1 @@
+queryset = Customer.objects.annotate(isNew=Value(True))
