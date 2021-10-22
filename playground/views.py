@@ -9,18 +9,19 @@ from store.models import Order
 from store.models import OrderItem
 from store.models import Customer
 from store.models import Address
+from store.models import Cart, CartItem
 from django.db.models import F, Q, Value, Func, ExpressionWrapper
 from django.db.models.aggregates import Count, Max, Min, Avg, Sum
 import json
 from django.db.models.functions import Concat
 from django.core.exceptions import ObjectDoesNotExist
 from tags.models import TaggedItem
-
+from django.db import transaction
+from django.db import connection
 
 # Create your views here.
 
-
-def say_hello(request):
+def order(request):
     # query_set = Product.objects.all()
     # for query in query_set:
     #     print(query)
@@ -30,17 +31,13 @@ def say_hello(request):
 
 def orm(request):
 
-    queryset = TaggedItem.objects.get_tags_for(Product, 1)
+    with connection.cursor() as corsor:
+    cursor = connection.cursor()
+    cursor.execute('')
+    cursor.close()
 
-    content_type = ContentType.objects.get_for_model(Product)
-    queryset = TaggedItem.objects \
-        .select_related('tag') \
-        .filter(content_type=content_type, object_id=1)
+    raw_queryset = Product.objects.raw('SELECT * FROM store_product')
 
-    queryset = Product.objects.annotate(
-        total_sales=Sum(F('orderitem__quantity') *
-                        F('orderitem__unit_price'))
-    ).order_by('-total_sales')[:5]
     return render(request, 'orm.html',
                   {
                       'result': list(queryset),
