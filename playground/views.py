@@ -1,5 +1,6 @@
 from django.db.models.fields import DecimalField
 from django.shortcuts import render
+from django.contrib.contenttypes.models import ContentType
 from django.http import HttpResponse
 from django.core.exceptions import ObjectDoesNotExist
 from store.models import Product
@@ -8,11 +9,12 @@ from store.models import Order
 from store.models import OrderItem
 from store.models import Customer
 from store.models import Address
-from django.db.models import F, Q, Value, Func
+from django.db.models import F, Q, Value, Func, ExpressionWrapper
 from django.db.models.aggregates import Count, Max, Min, Avg, Sum
 import json
 from django.db.models.functions import Concat
 from django.core.exceptions import ObjectDoesNotExist
+from tags.models import TaggedItem
 
 
 # Create your views here.
@@ -26,13 +28,22 @@ def say_hello(request):
     return HttpResponse('hello world')
 
 
-def orm(request):    
-    # query_set = Product.objects.filter(collection__title='beauty')
-    query_set = Customer.objects.filter(order__orderitem__product__title__icontains='bread').all()
-    # print(collection[0].orderitem)
+def orm(request):
+
+    queryset = TaggedItem.objects.get_tags_for(Product, 1)
+
+    content_type = ContentType.objects.get_for_model(Product)
+    queryset = TaggedItem.objects \
+        .select_related('tag') \
+        .filter(content_type=content_type, object_id=1)
+
+    queryset = Product.objects.annotate(
+        total_sales=Sum(F('orderitem__quantity') *
+                        F('orderitem__unit_price'))
+    ).order_by('-total_sales')[:5]
     return render(request, 'orm.html',
                   {
-                      'result': list(query_set),
+                      'result': list(queryset),
                   })
 
 

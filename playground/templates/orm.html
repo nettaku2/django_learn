@@ -17,7 +17,8 @@
 
   <body>
     <h1>Playground for ORM</h1>
-    <p>number of products - {{ result.unit_price__max }}</p>
-    <p>number of products - {{ result.unit_price__min }}</p>
+    {% for customer in result %}
+    <p>{{ customer.id }} {{ customer.new_id }}</p>
+    {% endfor %}
   </body>
 </html>
