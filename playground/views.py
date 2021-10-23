@@ -21,7 +21,8 @@ from django.db import connection
 
 # Create your views here.
 
-def order(request):
+
+def say_hello(request):
     # query_set = Product.objects.all()
     # for query in query_set:
     #     print(query)
@@ -31,12 +32,10 @@ def order(request):
 
 def orm(request):
 
-    with connection.cursor() as corsor:
-    cursor = connection.cursor()
-    cursor.execute('')
-    cursor.close()
-
-    raw_queryset = Product.objects.raw('SELECT * FROM store_product')
+    queryset = Product.objects.annotate(
+        total_sales=Sum(F('orderitem__quantity') *
+                        F('orderitem__unit_price'))
+    ).order_by('-total_sales')[:5]
 
     return render(request, 'orm.html',
                   {
