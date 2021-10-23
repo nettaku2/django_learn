@@ -15,6 +15,9 @@ class TaggedItemManager(models.Manager):
 class Tag(models.Model):
     label = models.CharField(max_length=255)
 
+    def __str__(self) -> str:
+        return self.label
+
 # What tag applied to what object
 
 
@@ -25,4 +28,4 @@ class TaggedItem(models.Model):
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     # ID of object - find record
     object_id = models.PositiveIntegerField()
-    content_object = GenericForeignKey()
+    content_object = GenericForeignKey()    
