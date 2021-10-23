@@ -7,6 +7,7 @@ from django.urls import reverse
 from django.utils.html import format_html, urlencode
 from . import models
 
+
 class InventoryFilter(admin.SimpleListFilter):
     title = 'inventory'
     parameter_name = 'inventory'
@@ -20,6 +21,7 @@ class InventoryFilter(admin.SimpleListFilter):
         if self.value() == '<10':
             return queryset.filter(inventory__lt=10)
 
+
 @admin.register(models.Product)
 class ProductAdmin(admin.ModelAdmin):
     actions = ['clear_inventory']
@@ -31,10 +33,10 @@ class ProductAdmin(admin.ModelAdmin):
                     'inventory_status', 'collection_title']
     list_editable = ['unit_price']
     list_per_page = 10
-    
+
     list_filter = ['collection', 'last_update', InventoryFilter]
     list_select_related = ['collection']
-    search_fields = ['title']    
+    search_fields = ['title']
 
     def collection_title(self, product):
         return product.collection.title
@@ -59,18 +61,18 @@ class ProductAdmin(admin.ModelAdmin):
 class CollectionAdmin(admin.ModelAdmin):
     list_display = ['title', 'products_count']
     search_fields = ['title']
+
     @admin.display(ordering='products_count')
     def products_count(self, collection):
-        # url = (reverse('admin:store_product_changelist') 
-        #   + '?collection__id=' 
+        # url = (reverse('admin:store_product_changelist')
+        #   + '?collection__id='
         #   + str(collection.id))
         url = (reverse('admin:store_product_changelist')
-            + '?'
-            + urlencode({
-                'collection__id': str(collection.id)
-            }))
+               + '?'
+               + urlencode({
+                   'collection__id': str(collection.id)
+               }))
         return format_html('<a href="{}">{}</a>', url, collection.products_count)
-         
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).annotate(
@@ -95,7 +97,7 @@ class CollectionAdmin(admin.ModelAdmin):
 
 
 @admin.register(models.Customer)
-class CustomerAdmin(admin.ModelAdmin):    
+class CustomerAdmin(admin.ModelAdmin):
     list_display = ['first_name', 'last_name', 'membership', 'orders_count']
     list_editable = ['membership']
     ordering = ['first_name', 'last_name']
@@ -105,16 +107,17 @@ class CustomerAdmin(admin.ModelAdmin):
     @admin.display(ordering="orders_count")
     def orders_count(self, customer):
         url = (reverse('admin:store_order_changelist')
-            + '?'
-            + urlencode({
-                'customer__id': str(customer.id)
-            })
-        )
+               + '?'
+               + urlencode({
+                   'customer__id': str(customer.id)
+               })
+               )
         return format_html('<a href="{}">{}</a>', url, customer.orders_count)
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         return super().get_queryset(request).annotate(
             orders_count=Count('order'))
+
 
 class OrderItemInline(admin.TabularInline):
     autocomplete_fields = ['product']

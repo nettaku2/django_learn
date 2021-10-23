@@ -27,5 +27,6 @@ urlpatterns = [
     path('say_hello/', say_hello),
     path('playground/', include('playground.urls')),
     path('__debug__/', include(debug_toolbar.urls)),
-    path('', orm)
+    path('', orm),
+    path('store/', include('store.urls'))
 ]
