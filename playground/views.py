@@ -43,6 +43,11 @@ def orm(request):
                   })
 
 
+def product_list(request):
+    queryset = Product.objects.all()
+    return render(request, 'template.html', {'result': list(queryset)})
+
+
 def say_hello2(request):
     query_set = Order.objects.select_related(
         'customer').values('id', 'customer__first_name').order_by('id').reverse()[:5]

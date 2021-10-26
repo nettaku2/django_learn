@@ -4,6 +4,12 @@ from decimal import Decimal
 from .models import Product, Collection
 
 
+class ProductSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    title = serializers.CharField(max_length=255)
+    unit_price = serializers.DecimalField(max_digits=6, decimal_places=2)
+
+
 class CollectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Collection
@@ -33,25 +39,25 @@ class CollectionSerializer(serializers.ModelSerializer):
 #     def calculate_tax(self, product: Product):
 #         return round(product.unit_price * Decimal(1.1), 2)
 
-class ProductSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Product
-        fields = ['id', 'title', 'description',
-                  'slug', 'inventory', 'price', 'price_with_tax', 'collection']
+# class ProductSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Product
+#         fields = ['id', 'title', 'description',
+#                   'slug', 'inventory', 'price', 'price_with_tax', 'collection']
 
-    price = serializers.DecimalField(
-        max_digits=6, decimal_places=2, source='unit_price')
+#     price = serializers.DecimalField(
+#         max_digits=6, decimal_places=2, source='unit_price')
 
-    price_with_tax = serializers.SerializerMethodField(
-        method_name='calculate_tax')
+#     price_with_tax = serializers.SerializerMethodField(
+#         method_name='calculate_tax')
 
-    # collection = serializers.HyperlinkedRelatedField(
-    #     queryset=Collection.objects.all(),
-    #     view_name='collection-detail'
-    # )
+#     # collection = serializers.HyperlinkedRelatedField(
+#     #     queryset=Collection.objects.all(),
+#     #     view_name='collection-detail'
+#     # )
 
-    def calculate_tax(self, product: Product):
-        return round(product.unit_price * Decimal(1.1), 2)
+#     def calculate_tax(self, product: Product):
+#         return round(product.unit_price * Decimal(1.1), 2)
 
     # def validate(self, data):
     #     if data['password'] != data['confirm_password']:
