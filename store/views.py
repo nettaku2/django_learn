@@ -14,14 +14,15 @@ from rest_framework import status
 @api_view()
 def product_list(request):
     queryset = Product.objects.select_related('collection')
-    serializer = ProductSerializer(queryset, many=True)
+    serializer = ProductSerializer(
+        queryset, many=True, context={'request': request})
     return Response(serializer.data)
 
 
 @api_view()
 def product_detail(request, id):
     product = get_object_or_404(Product, id=id)
-    serializer = ProductSerializer(product)
+    serializer = ProductSerializer(product, context={'request': request})
     return Response(serializer.data)
 
 
@@ -33,8 +34,8 @@ def collection_list(request):
 
 
 @api_view()
-def collection_detail(request, id):
-    collection = get_object_or_404(Collection, id=id)
+def collection_detail(request, pk):
+    collection = get_object_or_404(Collection, id=pk)
     serializers = CollectionSerializer(collection)
     return Response(serializers.data)
 
