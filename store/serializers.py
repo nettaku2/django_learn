@@ -11,21 +11,25 @@ class ProductSerializer(serializers.Serializer):
         max_digits=6, decimal_places=2, source='unit_price')
     price_with_tax = serializers.SerializerMethodField(
         method_name='calculate_tax')
-    collection_id = serializers.PrimaryKeyRelatedField(
-        queryset=Collection.objects.all()
+    collection_number = serializers.PrimaryKeyRelatedField(
+        queryset=Collection.objects.all(), source='collection'
     )
-    # collection_title = serializers.StringRelatedField()
+    collection_title = serializers.StringRelatedField(source='collection')
 
     def calculate_tax(self, product):
         return product.unit_price * Decimal(1.1)
 
 
-class CollectionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Collection
-        fields = ['id', 'title', 'products_count']
+class CollectionSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    title = serializers.CharField(max_length=255)
 
-    products_count = serializers.IntegerField()
+# class CollectionSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Collection
+#         fields = ['id', 'title', 'products_count']
+
+#     products_count = serializers.IntegerField()
 
     # def count_products(self, collection):
     #     return collection.product_set.count()
