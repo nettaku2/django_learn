@@ -1,7 +1,29 @@
 from django.db.models import fields
 from rest_framework import serializers
 from decimal import Decimal
-from .models import Product, Collection, Customer
+from .models import Product, Collection, Customer, Order, OrderItem, Review
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Review
+        fields = ['id', 'name', 'description', 'date']
+
+    def create(self, validated_data):
+        product_id = self.context['product_id']
+        return Review.objects.create(product_id=product_id, **validated_data)
+
+
+class OrderItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrderItem
+        fields = ['id', 'quantity', 'unit_price', 'order', 'product']
+
+
+class OrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = ['id', 'placed_at', 'payment_status', 'customer']
 
 
 class CustomerSerializer(serializers.ModelSerializer):
@@ -16,12 +38,12 @@ class CollectionSerializer(serializers.ModelSerializer):
         model = Collection
         fields = ['id', 'title', 'products_count']
 
-    products_count = serializers.IntegerField()
+    # products_count = serializers.IntegerField()
 
-    # products_count = serializers.SerializerMethodField('count_products')
+    products_count = serializers.SerializerMethodField('count_products')
 
-    # def count_products(self, collection):
-    #     return collection.product_set.count()
+    def count_products(self, collection):
+        return collection.product_set.count()
 
 # class CollectionSerializer(serializers.Serializer):
 #     id = serializers.IntegerField(required=False)
