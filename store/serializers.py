@@ -1,7 +1,8 @@
 from django.db.models import fields
 from rest_framework import serializers
 from decimal import Decimal
-from .models import Product, Collection, Customer, Order, OrderItem, Review
+from .models import Cart, CartItem, Product, Collection, Customer, Order, OrderItem, Review
+from uuid import uuid4
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -125,3 +126,71 @@ class ProductSerializer(serializers.ModelSerializer):
 
 #     def calculate_tax(self, product):
 #         return product.unit_price * Decimal(1.1)
+
+
+class SimpleProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = ['title', 'unit_price']
+
+
+class CartItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CartItem
+        fields = ['id', 'quantity', 'product', 'total_price']
+
+    total_price = serializers.SerializerMethodField('get_total_price')
+
+    def get_total_price(self, cartitem):
+        return Decimal(cartitem.quantity) * cartitem.product.unit_price
+
+    product = SimpleProductSerializer()
+
+
+class AddCartItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CartItem
+        fields = ['id', 'product_id', 'quantity']
+
+    def validate_product_id(self, value):
+        if not Product.objects.filter(pk=value).exists():
+            raise serializers.ValidationError(
+                "No Product with the given id was found")
+        return value
+
+    def save(self, **kwargs):
+        cart_id = self.context['cart_id']
+        product_id = self.validated_data['product_id']
+        quantity = self.validated_data['quantity']
+
+        try:
+            cart_item = CartItem.objects.get(
+                cart_id=cart_id, product_id=product_id)
+            cart_item.quantity += quantity
+            cart_item.save()
+            self.instance = cart_item
+
+        except CartItem.DoesNotExist:
+            self.instance = CartItem.objects.create(
+                cart_id=cart_id, **self.validated_data)
+
+        return self.instance
+
+        return super().save(**kwargs)
+
+    product_id = serializers.IntegerField()
+
+
+class CartSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Cart
+        fields = ['id', 'cartitem_set', 'total_price']
+
+    id = serializers.UUIDField(read_only=True)
+    cartitem_set = CartItemSerializer(many=True, read_only=True)
+    # created_at = serializers.DateTimeField(read_only=True)
+
+    total_price = serializers.SerializerMethodField('get_total_price')
+
+    def get_total_price(self, cart):
+        return sum([item.quantity * item.product.unit_price for item in cart.cartitem_set.all()])

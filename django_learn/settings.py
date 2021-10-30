@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'playground',
     'store',
-    'store_custom',
+    'core',
     'tags',
     'likes',
     'debug_toolbar',
@@ -156,5 +156,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 #     mimetypes.add_type("application/javascript", ".js", True)
 
 REST_FRAMEWORK = {
-    'COERCE_DECIMAL_TO_STRING': False
+    'COERCE_DECIMAL_TO_STRING': False,
+    # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    # 'PAGE_SIZE': 10
 }
+
+AUTH_USER_MODEL = 'core.User'

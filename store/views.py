@@ -4,21 +4,48 @@ from django.db.models.expressions import RawSQL
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
 from django.db.models import Count, Value
-from rest_framework import serializers
+from rest_framework import mixins, serializers
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from store.filters import ProductFilter
-from .models import Product, Collection, Customer, Order, OrderItem, Review
-from .serializers import CustomerSerializer, ProductSerializer, \
-    CollectionSerializer, OrderSerializer, OrderItemSerializer, ReviewSerializer
+from .models import Product, Collection, Customer, Order, OrderItem, Review, Cart, CartItem
+from .serializers import AddCartItemSerializer, CartItemSerializer, CustomerSerializer, ProductSerializer, \
+    CollectionSerializer, OrderSerializer, OrderItemSerializer, \
+    ReviewSerializer, CartSerializer
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
-from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
+from rest_framework.viewsets import GenericViewSet, ModelViewSet, ReadOnlyModelViewSet
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter, OrderingFilter
+from rest_framework.pagination import PageNumberPagination
+from .pagination import DefaultPagination
 
 # Create your views here.
+
+
+class CartViewSet(mixins.CreateModelMixin,
+                  mixins.RetrieveModelMixin,
+                  mixins.DestroyModelMixin,
+                  GenericViewSet):
+    queryset = Cart.objects.prefetch_related('cartitem_set__product')
+    serializer_class = CartSerializer
+
+
+class CartItemViewSet(ModelViewSet):
+
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return AddCartItemSerializer
+        return CartItemSerializer
+
+    def get_serializer_context(self):
+        return {'cart_id': self.kwargs['cart_pk']}
+
+    def get_queryset(self):
+        return CartItem.objects.filter(cart_id=self.kwargs['cart_pk']) \
+            .select_related('product')
 
 
 @api_view(['GET', 'POST'])
@@ -121,8 +148,13 @@ class ReviewViewSet(ModelViewSet):
 class ProductViewSet(ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    filter_backends = [DjangoFilterBackend]
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    # filter_backends = [DjangoFilterBackend, OrderingFilter]
+    # filter_backends = [DjangoFilterBackend]
     filterset_class = ProductFilter
+    pagination_class = DefaultPagination
+    ordering_fields = ['unit_price']
+    search_fields = ['title', 'description']
     # filterset_fields = ['collection_id', 'unit_price']
 
     def get_serializer_context(self):
