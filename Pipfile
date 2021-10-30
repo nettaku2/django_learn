@@ -11,6 +11,8 @@ djangorestframework = "*"
 django-cors-headers = "*"
 drf-nested-routers = "*"
 django-filter = "*"
+djoser = "*"
+djangorestframework-simplejwt = "*"
 
 [dev-packages]
 autopep8 = "*"

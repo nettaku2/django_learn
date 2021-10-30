@@ -30,8 +30,9 @@ class OrderSerializer(serializers.ModelSerializer):
 class CustomerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Customer
-        fields = ['id', 'first_name', 'last_name',
-                  'email', 'phone', 'birth_date', 'membership']
+        fields = ['id', 'user_id', 'phone', 'birth_date', 'membership']
+
+    user_id = serializers.IntegerField(read_only=True)
 
 
 class CollectionSerializer(serializers.ModelSerializer):

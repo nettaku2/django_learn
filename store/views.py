@@ -5,10 +5,11 @@ from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
 from django.db.models import Count, Value
 from rest_framework import mixins, serializers
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 
 from store.filters import ProductFilter
+from store.permissions import IsAdminOrReadOnly
 from .models import Product, Collection, Customer, Order, OrderItem, Review, Cart, CartItem
 from .serializers import AddCartItemSerializer, CartItemSerializer, CustomerSerializer, ProductSerializer, \
     CollectionSerializer, OrderSerializer, OrderItemSerializer, \
@@ -21,8 +22,34 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.pagination import PageNumberPagination
 from .pagination import DefaultPagination
+from rest_framework.decorators import action
+from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 
 # Create your views here.
+
+
+class CustomerViewSet(ModelViewSet):
+    queryset = Customer.objects.all()
+    serializer_class = CustomerSerializer
+    permission_classes = [IsAdminUser]
+
+    # def get_permissions(self):
+    #     if self.request.method == 'GET':
+    #         return [AllowAny()]
+    #     return [IsAuthenticated()]
+
+    @action(detail=False, methods=['GET', 'PUT'], permission_classes=[IsAuthenticated])
+    def me(self, request):
+        (customer, created) = Customer.objects.get_or_create(
+            user_id=request.user.id)
+        if request.method == 'GET':
+            serializer = CustomerSerializer(customer)
+            return Response(serializer.data)
+        elif request.method == 'PUT':
+            serializer = CustomerSerializer(customer, data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data)
 
 
 class CartViewSet(mixins.CreateModelMixin,
@@ -156,6 +183,7 @@ class ProductViewSet(ModelViewSet):
     ordering_fields = ['unit_price']
     search_fields = ['title', 'description']
     # filterset_fields = ['collection_id', 'unit_price']
+    permission_classes = [IsAdminOrReadOnly]
 
     def get_serializer_context(self):
         return {'request': self.request}
@@ -169,6 +197,7 @@ class ProductViewSet(ModelViewSet):
 class CollectionViewSet(ModelViewSet):
     queryset = Collection.objects.all()
     serializer_class = CollectionSerializer
+    permission_classes = [IsAdminOrReadOnly]
 
     def destroy(self, request, pk):
         collection = get_object_or_404(Collection, id=pk)
